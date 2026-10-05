@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
-# The whole build runs on `main` pushes and on manual dispatch. A pull request only
-# gets a verification run, because the Pages token is not available to untrusted
-# code and a PR must never be able to publish.
+# `main` pushes and manual dispatch build and publish. A pull request runs the
+# verification steps only: the publish permissions live on a job that a pull
+# request never reaches, so untrusted code has no way to obtain them.
 
 on:
   push:
@@ -24,6 +24,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -56,21 +58,32 @@ jobs:
         # The build output has none today, so this is a guarantee, not a fix.
         run: touch dist/.nojekyll
 
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
-      - name: Configure Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
-
+  deploy:
+    # A pull request gets the build job and nothing else. The permissions below
+    # exist only on this job, so a pull request has no path to them at all —
+    # which is stronger than guarding a step with an `if:`.
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Reads the artifact uploaded by the build job in this same run; no explicit
+      # download step is needed.
       - name: Deploy to GitHub Pages
-        if: github.event_name != 'pull_request'
-        # Requires `pages: write` and `id-token: write`. Granted per job so a pull
-        # request, which runs with read-only permissions, cannot obtain them.
-        permissions:
-          pages: write
-          id-token: write
+        id: deployment
         uses: actions/deploy-pages@v4
