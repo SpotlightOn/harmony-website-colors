@@ -288,6 +288,62 @@ export function readableInk(background: Rgb, minimum = 4.5): Rgb {
 }
 
 /** Same as `readableInk`, for hex inputs. Returns a `#rrggbb` string. */
+/**
+ * A light tint of `seed` that stays readable on every one of `backgrounds`.
+ *
+ * The WordPress theme this project exports for uses two "light" palette slots as
+ * link and caption colors *on top of* its dark section fills. A saturated harmony
+ * color cannot serve that role — measured, it landed at 1.30:1 — so the slot has to
+ * be a genuine tint: same hue, lightness pushed up until it clears every background
+ * it will be painted on.
+ *
+ * Chroma falls off as lightness rises, which is both how a tint looks and what keeps
+ * the color inside sRGB. Holding chroma constant while walking to white produces
+ * clipped, neon results.
+ *
+ * Candidates are judged quantized, for the same reason `readableInk` does.
+ */
+export function readableTint(seed: Rgb, backgrounds: readonly Rgb[], minimum = 4.5): Rgb {
+  const target = minimum + 0.1;
+  const origin = rgbToOklch(seed);
+
+  let best: Rgb | null = null;
+  let bestScore = -1;
+
+  // Start a little above the seed so a seed that already passes still gets lighter
+  // only as far as it must.
+  for (let step = 0; step <= 100; step += 1) {
+    const progress = step / 100;
+    const lightness = clamp(origin.l + (1 - origin.l) * progress, 0, 1);
+
+    // Fade toward neutral as it lightens, but never all the way: a tint with no
+    // chroma stops being recognizably the same hue as the color it came from.
+    const chroma = origin.c * (1 - progress * 0.55);
+
+    const raw = oklchToRgb({ l: lightness, c: chroma, h: origin.h });
+    const candidate: Rgb = {
+      r: Math.round(raw.r),
+      g: Math.round(raw.g),
+      b: Math.round(raw.b),
+    };
+
+    const worst = backgrounds.reduce(
+      (lowest, background) => Math.min(lowest, contrastRatio(background, candidate)),
+      Number.POSITIVE_INFINITY,
+    );
+
+    if (worst >= target) {
+      return candidate;
+    }
+    if (worst > bestScore) {
+      best = candidate;
+      bestScore = worst;
+    }
+  }
+
+  return best ?? seed;
+}
+
 export function readableInkHex(background: string): string {
   try {
     return rgbToHex(readableInk(hexToRgb(background)));

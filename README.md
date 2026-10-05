@@ -258,6 +258,48 @@ Tailwind names are kept **verbatim** under a `--color-*` namespace, so they beco
 names are the price of the contract surviving the trip into another project's
 conventions, and it is worth paying.
 
+### WordPress
+
+The panel also emits a `theme.json` **style variation** for block themes, as a
+separate section rather than a third format: a variation replaces values in a theme
+that already declares its own slugs, so the scope, slug and invariant options have
+nothing to act on. Save the output as `styles/<name>.json` in the theme and it
+appears under Appearance &rarr; Styles.
+
+The generator does not invent slugs. It targets the **Notor** theme's own vocabulary,
+so every block and template that references `var(--wp--preset--color--brand)` follows
+along instead of being stranded on the default:
+
+| Palette slot | Source |
+| --- | --- |
+| `brand`, `brand-deep` | the dominant harmony color and its hover |
+| `accent` | the second harmony color |
+| `base`, `surface`, `surface-deep` | the surface roles |
+| `ink`, `ink-soft`, `muted` | the text roles |
+| `brand-mist` | the accent wash |
+| `brand-light`, `accent-light` | **solved**, see below |
+
+Gradients and duotone presets are rebuilt from the same palette, keeping the theme's
+own angles and stops, and the shadow presets are re-tinted — the theme bakes its ink
+color into `rgb(16 22 23 / 0.08)`, so overriding only the palette would leave every
+shadow carrying the previous scheme's ink.
+
+Three things about this export are worth knowing before changing it:
+
+- **`brand-light` and `accent-light` are solved, not mapped.** Notor paints them as
+  link and caption colors *on top of* its dark `brand` and `ink` section fills. A
+  saturated harmony color cannot serve that role; measured, it landed at 1.30:1. Both
+  are generated as readable tints of the color they belong to, solved against every
+  background the theme puts them on.
+- **There is no dark variation.** The theme encodes absolute lightness in its sections
+  rather than roles — `section-ink` fills with `ink` expecting it to be the darkest
+  color in the palette. Inverting the palette turns that section white and leaves
+  `brand-light` as a light link color on a light background, measured at 1.55:1. No
+  toggle is offered rather than offering one that produces an unreadable site.
+- **The contrast checks are the theme's pairs, not invented ones.** The verification
+  sweep reads them out of the theme's own `theme.json`. An early version included
+  `ink` on `brand`, which the theme never renders — buttons put `base` on `brand`.
+
 ### Scopes
 
 | Scope | Selectors | Use for |
@@ -303,6 +345,11 @@ output:
 - uses unique selectors, so no block silently overrides another,
 - emits no role token outside Tailwind's `--color-*` namespace,
 - keeps the invariant layer free of color and untruncated by the parse.
+
+The WordPress variation gets its own sweep across all 576 schemes: valid JSON, the
+schema and version the theme uses, all twelve palette slugs plus every gradient,
+duotone and shadow slug, no missing gradient stops, re-tinted shadows, and the
+sixteen foreground/background pairs the theme actually renders at 4.5:1 or better.
 
 That last one caught a real bug: the parser was line-based, which silently cut the
 font stacks off after their first line.

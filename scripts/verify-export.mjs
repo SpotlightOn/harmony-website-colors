@@ -216,6 +216,63 @@ console.log('\nink guarantee');
   );
 }
 
+console.log('\nwordpress variation');
+{
+  const probe = bundle.wordpress;
+  const sample = probe.failures.slice(0, 4).map((f) => JSON.stringify(f));
+
+  check(
+    'variation is valid, complete and readable over every scheme',
+    probe.failures.length === 0,
+    `${probe.failures.length} of ${probe.checked} variations failed. e.g. ${sample.join(' ')}`,
+  );
+
+  const json = probe.sample?.json ? JSON.parse(probe.sample.json) : {};
+  const ink = json.settings?.color?.palette?.find((p) => p.slug === 'ink')?.color ?? '#000000';
+  const inkChannels = (ink.replace('#', '').match(/.{2}/g) ?? [])
+    .map((pair) => String(parseInt(pair, 16)))
+    .join(' ');
+
+  check('declares the schema the theme uses', /^https:\/\/schemas\.wp\.org\//.test(json.$schema ?? ''));
+  check('declares version 3', json.version === 3);
+
+  const paletteSlugs = (json.settings?.color?.palette ?? []).map((p) => p.slug);
+  const gradientSlugs = (json.settings?.color?.gradients ?? []).map((g) => g.slug);
+  const duotoneSlugs = (json.settings?.color?.duotone ?? []).map((d) => d.slug);
+
+  check(
+    `carries all ${probe.paletteSlugs.length} of the theme's palette slugs`,
+    probe.paletteSlugs.every((slug) => paletteSlugs.includes(slug)),
+    `missing ${probe.paletteSlugs.filter((s) => !paletteSlugs.includes(s)).join(', ')}`,
+  );
+  check(
+    `carries all ${probe.gradientSlugs.length} gradient slugs`,
+    probe.gradientSlugs.every((slug) => gradientSlugs.includes(slug)),
+  );
+  check(
+    `carries all ${probe.duotoneSlugs.length} duotone slugs`,
+    probe.duotoneSlugs.every((slug) => duotoneSlugs.includes(slug)),
+  );
+
+  check(
+    're-tints the shadow presets instead of keeping the previous ink',
+    (json.settings?.shadow?.presets ?? []).length > 0 &&
+      (json.settings?.shadow?.presets ?? []).every((preset) => preset.shadow.includes(inkChannels)),
+  );
+
+  check(
+    'points page background and text at the palette',
+    json.styles?.color?.background === 'var(--wp--preset--color--base)' &&
+      json.styles?.color?.text === 'var(--wp--preset--color--ink)',
+  );
+
+  check(
+    'writes a filename WordPress will pick up',
+    /^styles\/[a-z0-9-]+\.json$/.test(probe.sample?.filename ?? ''),
+    `got ${probe.sample?.filename}`,
+  );
+}
+
 console.log('\ncontract checker');
 {
   const complete = bundle.contract.complete;

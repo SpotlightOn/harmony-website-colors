@@ -11,6 +11,14 @@ import {
   type ScopeKind,
 } from '@/color/css-vars';
 import type { DerivedScheme } from '@/state/scheme';
+import {
+  NOTOR_DUOTONE,
+  NOTOR_GRADIENTS,
+  NOTOR_PALETTE,
+  serializeVariation,
+  variationSlug,
+  wordpressVariation,
+} from '@/color/wordpress';
 import { cx } from '@/lib/cx';
 import { CheckIcon, CopyIcon } from './icons';
 
@@ -29,6 +37,116 @@ const SCOPES: ReadonlyArray<{ id: ScopeKind; label: string; hint: string }> = [
 /** Round a byte count the way a download dialog would. */
 const fileSize = (text: string): string =>
   text.length < 1024 ? `${text.length} B` : `${(text.length / 1024).toFixed(1)} kB`;
+
+const WP_COPY_KEY = 'export-wordpress';
+
+/**
+ * WordPress style variation export.
+ *
+ * Kept separate from the stylesheet export because it answers a different question.
+ * A WordPress theme variation replaces *values* in a theme that already declares its
+ * own slugs, so the scope, slug and invariant options above have nothing to act on:
+ * there is one brand color, and every block in the theme already references the
+ * theme's own preset names.
+ */
+function WordPressExport({
+  derived,
+  copiedKey,
+  onCopy,
+}: {
+  derived: DerivedScheme;
+  copiedKey: string | null;
+  onCopy: (key: string, text: string) => void;
+}) {
+  const [titleOverride, setTitleOverride] = useState<string | null>(null);
+
+  /*
+   * Light only, on purpose. The theme's sections encode absolute lightness rather
+   * than roles — `section-ink` fills with `ink` expecting it to be the darkest color
+   * in the palette — so a dark scheme turns that section white and leaves its link
+   * color at 1.55:1. There is no honest dark variation of this theme, so no toggle is
+   * offered.
+   */
+  const theme = derived.primary.light;
+  const title = titleOverride ?? derived.label;
+
+  const json = useMemo(
+    () => serializeVariation(wordpressVariation(theme, { title })),
+    [theme, title],
+  );
+
+  const filename = `styles/${variationSlug(title)}.json`;
+
+  return (
+    <details className="wpExport">
+      <summary className="wpExport__summary">
+        WordPress theme.json
+        <span className="wpExport__badge">{NOTOR_PALETTE.length} presets</span>
+      </summary>
+
+      <p className="export__hint">
+        A style variation for a block theme. Save it as <code>{filename}</code> in the
+        theme&rsquo;s <code>styles/</code> directory; it appears in the Site Editor under
+        Appearance &rarr; Styles. It re-colors the primary accent and keeps the
+        theme&rsquo;s own preset slugs, so its blocks and templates follow along.
+      </p>
+
+      <div className="export__slug">
+        <div className="export__slugHead">
+          <span className="export__slugLabel" id="wp-title-label">
+            Style name
+          </span>
+          {titleOverride !== null ? (
+            <button
+              type="button"
+              className="export__slugReset"
+              onClick={() => setTitleOverride(null)}
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
+        <input
+          className="hexInput"
+          value={title}
+          spellCheck={false}
+          autoComplete="off"
+          aria-labelledby="wp-title-label"
+          onChange={(event) => setTitleOverride(event.target.value)}
+        />
+      </div>
+
+      <p className="export__hint">
+        Slot mapping: brand &larr; <code>{derived.primary.swatch.hex}</code>, accent
+        &larr; second harmony color, base &larr; surface, ink &larr; text-strong.{' '}
+        {NOTOR_GRADIENTS.length} gradients and {NOTOR_DUOTONE.length} duotones are
+        rebuilt from the same palette. The two light slots are solved as readable tints
+        rather than lifted from the scheme, and the shadow presets are re-tinted so no
+        shadow keeps the old ink.
+      </p>
+
+      <pre className="export__preview" tabIndex={0} aria-label="WordPress variation preview">
+        <code>{json}</code>
+      </pre>
+
+      <div className="export__meta">
+        <span>{filename}</span>
+        <span>{fileSize(json)}</span>
+      </div>
+
+      <div className="export__buttons">
+        <button
+          type="button"
+          className="btn btn--solid btn--sm"
+          onClick={() => onCopy(WP_COPY_KEY, json)}
+        >
+          {copiedKey === WP_COPY_KEY ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
+          Copy theme.json
+        </button>
+      </div>
+    </details>
+  );
+}
 
 export function ExportBlock({ derived, copiedKey, onCopy }: ExportBlockProps) {
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
@@ -172,6 +290,8 @@ export function ExportBlock({ derived, copiedKey, onCopy }: ExportBlockProps) {
       </div>
 
       <ContractChecker copiedKey={copiedKey} onCopy={onCopy} />
+
+      <WordPressExport derived={derived} copiedKey={copiedKey} onCopy={onCopy} />
 
       <details className="tokenRef">
         <summary className="tokenRef__summary">
