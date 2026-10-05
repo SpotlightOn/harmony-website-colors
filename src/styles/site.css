@@ -1,0 +1,743 @@
+/**
+ * Demo page styles.
+ *
+ * Rule of the house: this file never mentions a color. It only ever references
+ * role tokens, which is exactly what allows one stylesheet to render every scheme
+ * the generator produces, and what makes the exported token set sufficient on its
+ * own.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Scope base                                                          */
+/* ------------------------------------------------------------------ */
+
+.scope {
+  position: relative;
+  background-color: var(--surface);
+  color: var(--text-body);
+  transition: var(--transition-theme);
+}
+
+/*
+ * `:where()` is deliberate: it contributes no specificity, so the low-value link
+ * color never outranks the component classes below it (`.siteNav__link`,
+ * `.brand`, `.footer__link`, ...).
+ */
+.scope :where(a) {
+  color: var(--link);
+  text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent);
+  text-underline-offset: 0.2em;
+  transition: var(--transition-theme);
+}
+
+.scope :where(a):hover {
+  color: var(--link-hover);
+  text-decoration-color: currentColor;
+}
+
+.scope :where(a:visited) {
+  color: var(--link-visited);
+}
+
+.scope :where(code) {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-xs);
+  background-color: var(--surface-sunken);
+  color: var(--text-strong);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+.skipLink {
+  position: absolute;
+  top: var(--space-2xs);
+  left: var(--space-2xs);
+  z-index: var(--z-header);
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skipLink:focus-visible {
+  transform: none;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent-alt);
+}
+
+.sectionTitle {
+  margin-top: var(--space-2xs);
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  max-width: 24ch;
+}
+
+.sectionLead {
+  margin-top: var(--space-sm);
+  max-width: var(--content-measure);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-body);
+}
+
+.sectionHead {
+  margin-bottom: var(--space-xl);
+}
+
+/* ------------------------------------------------------------------ */
+/* Header                                                              */
+/* ------------------------------------------------------------------ */
+
+.headerScope {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.siteHeader__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  min-height: var(--header-height);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  color: var(--text-strong);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-tight);
+  text-decoration: none;
+}
+
+.siteNav {
+  margin-left: auto;
+}
+
+.siteNav__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.siteNav__link {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.siteNav__link:hover {
+  color: var(--text-strong);
+}
+
+.siteHeader__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+@media (max-width: 780px) {
+  .siteNav {
+    display: none;
+  }
+
+  .siteHeader__actions {
+    margin-left: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
+
+/* Pill shaped buttons for the demo page. Scoped so the tool panel keeps its own. */
+.scope .btn--quiet,
+.scope .btn--solid,
+.scope .btn--outline {
+  border-radius: var(--radius-pill);
+  padding: var(--space-2xs) var(--space-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/*
+ * Explicit colors. The shared `.btn` rules in `app.css` are loaded first and
+ * would otherwise lose to `.scope :where(a)` on equal specificity.
+ */
+.scope .btn--solid {
+  color: var(--text-on-accent);
+}
+
+/*
+ * The secondary call to action.
+ *
+ * Same hue as the primary button, no fill. Emphasis comes from the treatment, not
+ * from a different color: pairing a violet solid with a green outline made the two
+ * look unrelated rather than related. A secondary action that must recede does so
+ * by being unfilled, not by borrowing another hue. The second harmony color still
+ * has a job — links, badges, the eyebrow dot — it just is not the button.
+ */
+.scope .btn--outline {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.scope .btn--outline:hover {
+  background-color: var(--accent);
+  color: var(--text-on-accent);
+  border-color: var(--accent);
+}
+
+.scope .btn--quiet {
+  color: var(--text-body);
+}
+
+.scope .btn--quiet:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+
+.hero {
+  overflow: hidden;
+  padding-block: var(--section-pad-block);
+}
+
+.hero__glow {
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 130%;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 44% at 22% 28%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 70%),
+    radial-gradient(34% 40% at 78% 18%, color-mix(in srgb, var(--link) 28%, transparent), transparent 72%);
+  filter: blur(8px);
+}
+
+.hero__inner {
+  position: relative;
+  max-width: 54rem;
+}
+
+.hero__title {
+  margin-top: var(--space-xs);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  color: var(--text-strong);
+  max-width: 18ch;
+}
+
+.hero__lead {
+  margin-top: var(--space-sm);
+  max-width: 46ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-body);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-top: var(--space-lg);
+}
+
+.hero__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-md);
+  margin: var(--space-xl) 0 0;
+  padding-top: var(--space-md);
+  border-top: var(--border-width) solid var(--border);
+}
+
+.stat__value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+}
+
+.stat__label {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Teasers                                                             */
+/* ------------------------------------------------------------------ */
+
+.teasers {
+  padding-block: var(--section-pad-block);
+  border-top: var(--border-width) solid var(--border);
+}
+
+.teaserGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.teaserCard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--border);
+  background-color: var(--surface-raised);
+  overflow: hidden;
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+.teaserCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
+}
+
+.teaserCard__media {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.teaserCard__media .art {
+  width: 100%;
+  height: 100%;
+}
+
+.teaserCard__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+  flex: 1;
+  padding: var(--space-md);
+}
+
+.teaserCard__title {
+  font-size: var(--text-xl);
+  color: var(--text-strong);
+}
+
+.teaserCard__text {
+  flex: 1;
+  color: var(--text-body);
+}
+
+.linkArrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.linkArrow__glyph {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.linkArrow:hover .linkArrow__glyph {
+  transform: translateX(3px);
+}
+
+/* ------------------------------------------------------------------ */
+/* Prose                                                               */
+/* ------------------------------------------------------------------ */
+
+.proseSection {
+  padding-block: var(--section-pad-block);
+  background-color: var(--surface-sunken);
+  border-top: var(--border-width) solid var(--border);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+/*
+ * Editorial two column layout: the heading stays put while the prose scrolls.
+ * Keeps the section from reading as a narrow column with a large empty margin.
+ */
+.proseSection__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .proseSection__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+@media (min-width: 901px) {
+  .proseSection .sectionHead {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-lg));
+  }
+}
+
+.prose {
+  max-width: var(--content-measure);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.prose__subhead {
+  margin-top: var(--space-xs);
+  font-size: var(--text-xl);
+  color: var(--text-strong);
+}
+
+.pullQuote {
+  margin: var(--space-sm) 0;
+  padding: var(--space-md) var(--space-md) var(--space-md) var(--space-lg);
+  /* Third harmony color: an editorial accent rather than a brand fill. */
+  border-left: var(--border-width-heavy) solid var(--accent-tertiary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background-color: var(--surface-raised);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-strong);
+}
+
+.checkList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkList > li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+}
+
+.checkList__mark {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent-alt);
+}
+
+/* Tick drawn from two borders; cheaper and sharper than shipping an SVG. */
+.checkList__mark::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--accent-on-alt);
+  border-width: 0 2px 2px 0;
+  transform: rotate(43deg);
+}
+
+.link {
+  font-weight: var(--weight-medium);
+}
+
+/* ------------------------------------------------------------------ */
+/* Generated variant sections                                          */
+/* ------------------------------------------------------------------ */
+
+.variant {
+  padding-block: var(--section-pad-block);
+  border-top: var(--border-width) solid var(--border);
+}
+
+.variant__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .variant__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+.variant__body {
+  margin-block: var(--space-sm);
+  max-width: 48ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-body);
+}
+
+/* Named `detailPanel`, not `panel`: the control sidebar already owns `.panel`. */
+.detailPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  border: var(--border-width) solid var(--border);
+  background-color: var(--surface-raised);
+  box-shadow: var(--shadow-md);
+}
+
+.detailPanel__stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin: 0;
+}
+
+.detailPanel__stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2xs);
+  padding-bottom: var(--space-2xs);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.detailPanel__stat:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detailPanel__statLabel {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.detailPanel__statValue {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  color: var(--text-strong);
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  padding: 2px var(--space-2xs);
+  border-radius: var(--radius-pill);
+  /*
+   * The wash identifies the second harmony color; the ink comes from
+   * `--text-strong`, not from `--accent-on-alt`.
+   *
+   * `--accent-on-alt` is solved against the SOLID alt fill, so putting it on the
+   * soft wash gave near-white text on a pale wash: 1.13:1 in the light tone and
+   * near-black on a dark wash in the dark tone. `--text-strong` is tuned against
+   * the surfaces, and the wash sits between surface and accent, so it holds in
+   * both tones. The pair is asserted by the audit as `text-strong` on
+   * `accent-alt-soft`.
+   */
+  border: var(--border-width) solid var(--accent-alt);
+  background-color: var(--accent-alt-soft);
+  color: var(--text-strong);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.well {
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-sunken);
+  border: var(--border-width) solid var(--border);
+}
+
+.well__title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.well__text {
+  margin-block: var(--space-3xs) var(--space-2xs);
+  font-size: var(--text-sm);
+  color: var(--text-body);
+}
+
+/* ------------------------------------------------------------------ */
+/* Palette strip                                                       */
+/* ------------------------------------------------------------------ */
+
+.paletteStrip {
+  padding-block: var(--section-pad-block);
+  background-color: var(--surface-sunken);
+  border-top: var(--border-width) solid var(--border);
+}
+
+.swatchStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.swatchStrip__item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 7.5rem;
+  padding: var(--space-2xs);
+  border-radius: var(--radius-md);
+  border: var(--border-width) solid var(--border-strong);
+  font-size: var(--text-xs);
+  transition: var(--transition-theme);
+}
+
+.swatchStrip__index {
+  font-family: var(--font-mono);
+  opacity: 0.75;
+}
+
+.swatchStrip__name {
+  font-weight: var(--weight-semibold);
+  line-height: 1.15;
+}
+
+.swatchStrip__hex {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  opacity: 0.9;
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+.siteFooter {
+  border-top: var(--border-width) solid var(--border);
+}
+
+.footer {
+  padding-block: var(--space-2xl) var(--space-lg);
+}
+
+.footer__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+  gap: var(--space-xl);
+}
+
+@media (max-width: 760px) {
+  .footer__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+.footer__tagline {
+  margin-top: var(--space-2xs);
+  max-width: 26ch;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.footer__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-md);
+}
+
+.footer__column ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  margin: var(--space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer__columnTitle {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.footer__link {
+  font-size: var(--text-sm);
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.footer__link:hover {
+  color: var(--text-strong);
+}
+
+.footer__legal {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: var(--border-width) solid var(--border);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}

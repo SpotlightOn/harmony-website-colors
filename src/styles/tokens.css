@@ -1,0 +1,127 @@
+/**
+ * Scheme-invariant design tokens.
+ *
+ * Everything in this file is deliberately color-free. Spacing, typography, radii,
+ * motion and layout stay identical across every generated color scheme, so when
+ * a scheme changes, only hue and tone move. The color half of the system lives in
+ * `src/color/theme.ts` and arrives as role tokens at runtime.
+ */
+
+:root {
+  /* ---------------------------------------------------------------- */
+  /* Spacing                                                          */
+  /* ---------------------------------------------------------------- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* ---------------------------------------------------------------- */
+  /* Typography                                                       */
+  /* ---------------------------------------------------------------- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: clamp(2.375rem, 1.4rem + 3.6vw, 3.75rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.28;
+  --leading-normal: 1.62;
+  --leading-relaxed: 1.75;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.022em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-caps: 0.13em;
+
+  /* ---------------------------------------------------------------- */
+  /* Radii and borders                                                */
+  /* ---------------------------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --border-width: 1px;
+  --border-width-thick: 2px;
+  --border-width-heavy: 3px;
+
+  /* ---------------------------------------------------------------- */
+  /* Layout                                                           */
+  /* ---------------------------------------------------------------- */
+  --container-width: 74rem;
+  --container-pad: clamp(1rem, 4vw, 3rem);
+  --panel-width: 23.5rem;
+  /* Rail width when the control panel is collapsed. */
+  --panel-width-collapsed: 3rem;
+  --header-height: 4rem;
+  --section-pad-block: clamp(3.5rem, 7vw, 6.5rem);
+  --content-measure: 68ch;
+
+  /* ---------------------------------------------------------------- */
+  /* Motion                                                           */
+  /* ---------------------------------------------------------------- */
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --transition-theme:
+    background-color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    fill var(--duration-base) var(--ease-out),
+    stroke var(--duration-base) var(--ease-out);
+
+  /* ---------------------------------------------------------------- */
+  /* Elevation                                                        */
+  /* ---------------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px -1px var(--shadow);
+  --shadow-md:
+    0 2px 4px -2px var(--shadow),
+    0 6px 14px -6px var(--shadow);
+  --shadow-lg: 0 20px 44px -14px var(--shadow);
+
+  /* ---------------------------------------------------------------- */
+  /* Stacking                                                         */
+  /* ---------------------------------------------------------------- */
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-header: 20;
+  --z-panel: 30;
+}
+
+/* Respect the user's motion preference everywhere. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 1ms;
+    --duration-fast: 1ms;
+    --duration-base: 1ms;
+    --duration-slow: 1ms;
+  }
+}

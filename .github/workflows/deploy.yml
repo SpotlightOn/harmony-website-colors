@@ -1,0 +1,76 @@
+name: Deploy to GitHub Pages
+
+# The whole build runs on `main` pushes and on manual dispatch. A pull request only
+# gets a verification run, because the Pages token is not available to untrusted
+# code and a PR must never be able to publish.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two deploys must never overlap. Cancelling in progress would be the default, and
+# that is wrong here: it can interrupt a publish partway and leave the live site
+# serving a half-written artifact.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Typecheck, production build and the export verification. This is the same
+      # command used locally, so a green run here means the same thing a green run
+      # on a laptop means.
+      - name: Check
+        run: pnpm check
+
+      - name: Build for GitHub Pages
+        env:
+          # A project Pages site is served from /<repo>/. The build emits absolute
+          # asset paths, so without this every /static/... request 404s.
+          BASE_PATH: /${{ github.event.repository.name }}/
+        run: pnpm build
+
+      - name: Disable Jekyll processing
+        # Jekyll skips files and directories whose names start with an underscore.
+        # The build output has none today, so this is a guarantee, not a fix.
+        run: touch dist/.nojekyll
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Deploy to GitHub Pages
+        if: github.event_name != 'pull_request'
+        # Requires `pages: write` and `id-token: write`. Granted per job so a pull
+        # request, which runs with read-only permissions, cannot obtain them.
+        permissions:
+          pages: write
+          id-token: write
+        uses: actions/deploy-pages@v4
